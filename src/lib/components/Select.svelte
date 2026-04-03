@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from "svelte";
-	import { SettingContext } from "../scripts/types";
+	import type { SettingContext } from "../scripts/types";
 	import { getValue, setValue } from "../utilities/store";
 
 	// receive props in runes mode
