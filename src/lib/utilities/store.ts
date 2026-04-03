@@ -1,10 +1,28 @@
+function isContextInvalidated(): boolean {
+	try {
+		return !browser.runtime?.id;
+	} catch {
+		return true;
+	}
+}
+
 export async function getValue(key: string, defaultValue: unknown) {
-	const result = await browser.storage.local.get("local:" + key);
-	return result["local:" + key] ?? defaultValue;
+	if (isContextInvalidated()) return defaultValue;
+	try {
+		const result = await browser.storage.local.get("local:" + key);
+		return result["local:" + key] ?? defaultValue;
+	} catch {
+		return defaultValue;
+	}
 }
 
 export function setValue(key: string, value: unknown) {
-	return browser.storage.local.set({ ["local:" + key]: value });
+	if (isContextInvalidated()) return Promise.resolve();
+	try {
+		return browser.storage.local.set({ ["local:" + key]: value });
+	} catch {
+		return Promise.resolve();
+	}
 }
 
 export async function getBaseUrl() {

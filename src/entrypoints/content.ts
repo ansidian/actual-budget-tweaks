@@ -7,10 +7,25 @@ import { mount, unmount } from "svelte";
 export default defineContentScript({
 	matches: ["<all_urls>"],
 	main(ctx) {
+		function isContextInvalidated(): boolean {
+			try {
+				return !browser.runtime?.id;
+			} catch {
+				return true;
+			}
+		}
+
 		async function checkAndMount() {
+			if (isContextInvalidated()) return;
+
 			const baseUrl = await getBaseUrl();
 			if (baseUrl && window.location.href.startsWith(baseUrl)) {
-				const css = browser.runtime.getURL("/css/base.css");
+				let css: string;
+				try {
+					css = browser.runtime.getURL("/css/base.css");
+				} catch {
+					return; // Extension context invalidated
+				}
 
 				document.body.appendChild(
 					createElement("link", {
