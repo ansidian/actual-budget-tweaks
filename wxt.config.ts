@@ -23,6 +23,10 @@ export default defineConfig({
 				css: ["content-scripts/income-breakdown.css"],
 				js: ["content-scripts/income-breakdown-loader.js"],
 			},
+			{
+				matches: ["<all_urls>"],
+				js: ["content-scripts/category-template-insights-loader.js"],
+			},
 		],
 		web_accessible_resources: [
 			{
@@ -31,6 +35,7 @@ export default defineConfig({
 					"lib/d3.min.js",
 					"lib/d3-sankey.min.js",
 					"content-scripts/income-breakdown.js",
+					"content-scripts/category-template-insights.js",
 				],
 				matches: ["<all_urls>"],
 			},
