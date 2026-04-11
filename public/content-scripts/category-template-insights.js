@@ -61,14 +61,37 @@
   // ── AQL data ──────────────────────────────────────────────────────────
   let insights = null;       // Map<categoryId, entry>
   let loading = null;
-  let loadRetries = 0;
-  const MAX_LOAD_RETRIES = 20;
-  const LOAD_RETRY_DELAY_MS = 500;
+
+  // The worker's sqlite db isn't ready immediately on page load. Calling
+  // $query before it is throws "Cannot read properties of null (reading
+  // 'prepare')" and triggers Actual's global error toast. We detect
+  // readiness via a DOM signal: Actual only renders per-category spreadsheet
+  // cells (budget{YYYYMM}!sum-amount-<id>) after the worker has hydrated.
+  function isBackendReady() {
+    if (typeof window.$q !== 'function' || typeof window.$query !== 'function') {
+      return false;
+    }
+    return !!document.querySelector(
+      '[data-testid^="budget2"][data-testid*="!sum-amount-"]'
+    );
+  }
+
+  function waitForBackendReady() {
+    return new Promise((resolve) => {
+      if (isBackendReady()) { resolve(); return; }
+      const tick = () => {
+        if (isBackendReady()) { resolve(); return; }
+        setTimeout(tick, 200);
+      };
+      tick();
+    });
+  }
 
   async function loadData() {
     if (insights) return insights;
     if (loading) return loading;
     loading = (async () => {
+      await waitForBackendReady();
       const q = window.$q, query = window.$query;
       if (!q || !query) return null;
       try {
@@ -135,29 +158,14 @@
           next.set(c.id, { id: c.id, name: c.name, templates, linkedSchedules });
         }
         insights = next;
-        loadRetries = 0;
         return insights;
       } catch (err) {
-        // Backend may not be initialized yet ("prepare" of null); retry.
         loading = null;
-        if (loadRetries < MAX_LOAD_RETRIES) {
-          loadRetries++;
-          await new Promise(r => setTimeout(r, LOAD_RETRY_DELAY_MS));
-          return loadData();
-        }
-        console.error('[ABT CTI] Failed to load data after retries:', err);
+        console.error('[ABT CTI] Failed to load data:', err);
         return null;
       }
     })();
     return loading;
-  }
-
-  function invalidateData() {
-    insights = null;
-    loading = null;
-    loadRetries = 0;
-    goalCache.clear();
-    budgetedCache.clear();
   }
 
   // ── DOM scraping & backend reads ──────────────────────────────────────
@@ -201,7 +209,6 @@
 
   // Goal cache: catId → cents. Invalidated on month change.
   const goalCache = new Map();
-  const budgetedCache = new Map();
 
   async function fetchGoalCents(catId) {
     if (goalCache.has(catId)) return goalCache.get(catId);
@@ -213,17 +220,6 @@
       goalCache.set(catId, value);
       return value;
     } catch (err) {
-      return null;
-    }
-  }
-
-  async function fetchBudgetedCents(catId) {
-    const sheet = getCurrentSheetName();
-    if (!sheet || typeof window.$send !== 'function') return null;
-    try {
-      const res = await window.$send('get-cell', { sheetName: sheet, name: 'budget-' + catId });
-      return res && typeof res.value === 'number' ? res.value : null;
-    } catch {
       return null;
     }
   }
@@ -407,7 +403,6 @@
   // on/before it they're "upcoming".
   function computeUpcomingThreshold(todayIsoStr, pref) {
     const [y, m, d] = todayIsoStr.split('-').map(Number);
-    const base = new Date(y, m - 1, d);
     const iso = (dt) =>
       `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}-${String(dt.getDate()).padStart(2, '0')}`;
 
