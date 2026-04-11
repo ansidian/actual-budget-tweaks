@@ -20,7 +20,6 @@ export default defineConfig({
 		content_scripts: [
 			{
 				matches: ["<all_urls>"],
-				css: ["content-scripts/income-breakdown.css"],
 				js: ["content-scripts/income-breakdown-loader.js"],
 			},
 			{
@@ -32,6 +31,8 @@ export default defineConfig({
 			{
 				resources: [
 					"css/base.css",
+					"content-scripts/content.css",
+					"content-scripts/income-breakdown.css",
 					"lib/d3.min.js",
 					"lib/d3-sankey.min.js",
 					"content-scripts/income-breakdown.js",

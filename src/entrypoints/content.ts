@@ -6,6 +6,7 @@ import { mount, unmount } from "svelte";
 
 export default defineContentScript({
 	matches: ["<all_urls>"],
+	cssInjectionMode: "manual",
 	main(ctx) {
 		function isContextInvalidated(): boolean {
 			try {
@@ -20,9 +21,13 @@ export default defineContentScript({
 
 			const baseUrl = await getBaseUrl();
 			if (baseUrl && window.location.href.startsWith(baseUrl)) {
-				let css: string;
+				let baseCss: string;
+				let componentCss: string;
 				try {
-					css = browser.runtime.getURL("/css/base.css");
+					baseCss = browser.runtime.getURL("/css/base.css");
+					componentCss = browser.runtime.getURL(
+						"/content-scripts/content.css"
+					);
 				} catch {
 					return; // Extension context invalidated
 				}
@@ -30,7 +35,13 @@ export default defineContentScript({
 				document.body.appendChild(
 					createElement("link", {
 						rel: "stylesheet",
-						href: css,
+						href: baseCss,
+					})
+				);
+				document.body.appendChild(
+					createElement("link", {
+						rel: "stylesheet",
+						href: componentCss,
 					})
 				);
 

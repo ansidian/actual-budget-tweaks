@@ -13,7 +13,25 @@
     });
   }
 
-  injectScript('content-scripts/category-template-insights.js').catch((err) => {
-    console.error('[ABT CTI] Failed to inject script:', err);
-  });
+  async function getBaseUrl() {
+    try {
+      const result = await chrome.storage.local.get('local:user-link');
+      const userLink = result['local:user-link'];
+      if (!userLink) return null;
+      const url = new URL(userLink);
+      return `${url.protocol}//${url.host}/`;
+    } catch {
+      return null;
+    }
+  }
+
+  (async () => {
+    const baseUrl = await getBaseUrl();
+    if (!baseUrl || !window.location.href.startsWith(baseUrl)) return;
+    try {
+      await injectScript('content-scripts/category-template-insights.js');
+    } catch (err) {
+      console.error('[ABT CTI] Failed to inject script:', err);
+    }
+  })();
 })();
