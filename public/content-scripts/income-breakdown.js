@@ -397,6 +397,12 @@
   }
 
   function showTransactionPopover(nodeId, nodeName, anchorX, anchorY, container) {
+    // Toggle: clicking the same node that's already open dismisses it
+    const existing = document.getElementById('abt-ib-popover');
+    if (existing && existing.dataset.nodeId === nodeId) {
+      closeTransactionPopover();
+      return;
+    }
     closeTransactionPopover();
 
     const txs = getTransactionsForNode(nodeId);
@@ -407,6 +413,7 @@
     const popover = document.createElement('div');
     popover.id = 'abt-ib-popover';
     popover.className = 'abt-ib-popover';
+    popover.dataset.nodeId = nodeId;
 
     txs.sort((a, b) => b.date.localeCompare(a.date));
     const total = txs.reduce((s, t) => s + t.amount, 0);
@@ -492,12 +499,18 @@
 
     popover.querySelector('.abt-ib-popover-close').addEventListener('click', closeTransactionPopover);
 
-    // Dismiss on click outside
+    // Dismiss on click outside — but let node/link clicks reach their handlers
+    // so they can toggle (close when clicking the same node) or swap popovers.
     function onOutsideClick(e) {
-      if (!popover.contains(e.target)) {
-        closeTransactionPopover();
+      // If this popover is already gone (replaced by a newer one), clean up.
+      if (!popover.isConnected) {
         document.removeEventListener('mousedown', onOutsideClick, true);
+        return;
       }
+      if (popover.contains(e.target)) return;
+      if (e.target.closest('.abt-ib-node') || e.target.closest('.abt-ib-link')) return;
+      closeTransactionPopover();
+      document.removeEventListener('mousedown', onOutsideClick, true);
     }
     // Delay to avoid catching the click that opened it
     setTimeout(() => document.addEventListener('mousedown', onOutsideClick, true), 0);
