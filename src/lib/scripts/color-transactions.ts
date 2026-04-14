@@ -9,9 +9,11 @@ function colorUpcomingRows() {
 		const firstChild = cat.firstElementChild;
 		if (firstChild && firstChild.textContent === "Upcoming") {
 			const date = row.querySelector<HTMLElement>('*[data-testid="date"]');
+			const account = row.querySelector<HTMLElement>('*[data-testid="account"]');
 			const payee = row.querySelector<HTMLElement>('*[data-testid="payee"]');
 			const notes = row.querySelector<HTMLElement>('*[data-testid="notes"]');
 			if (date) date.style.color = "var(--ctp-peach)";
+			if (account) account.style.color = "var(--ctp-peach)";
 			if (payee) payee.style.color = "var(--ctp-peach)";
 			if (notes) notes.style.color = "var(--ctp-peach)";
 		}
@@ -21,9 +23,11 @@ function colorUpcomingRows() {
 function clearUpcomingRows() {
 	document.querySelectorAll('*[data-testid="row"]').forEach((row) => {
 		const date = row.querySelector<HTMLElement>('*[data-testid="date"]');
+		const account = row.querySelector<HTMLElement>('*[data-testid="account"]');
 		const payee = row.querySelector<HTMLElement>('*[data-testid="payee"]');
 		const notes = row.querySelector<HTMLElement>('*[data-testid="notes"]');
 		if (date) date.style.removeProperty("color");
+		if (account) account.style.removeProperty("color");
 		if (payee) payee.style.removeProperty("color");
 		if (notes) notes.style.removeProperty("color");
 	});
