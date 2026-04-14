@@ -27,3 +27,4 @@ web-ext.config.ts
 
 # Playwright MCP session artifacts
 .playwright-mcp/
+.claude/
