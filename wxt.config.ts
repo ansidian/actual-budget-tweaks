@@ -9,7 +9,7 @@ export default defineConfig({
 	manifest: {
 		name: "Actual Budget – Tweaks",
 		description: "",
-		permissions: ["storage"],
+		permissions: ["storage", "tabs"],
 		browser_specific_settings: {
 			gecko: {
 				data_collection_permissions: {

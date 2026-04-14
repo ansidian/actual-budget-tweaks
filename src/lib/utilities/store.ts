@@ -25,13 +25,17 @@ export function setValue(key: string, value: unknown) {
 	}
 }
 
-export async function getBaseUrl() {
-	const userLink = await getValue("user-link", null);
-	if (!userLink) return null;
+export function normalizeBaseUrl(input: string | null | undefined): string | null {
+	if (!input) return null;
 	try {
-		const url = new URL(userLink);
+		const url = new URL(input);
 		return `${url.protocol}//${url.host}/`;
-	} catch (e) {
+	} catch {
 		return null;
 	}
+}
+
+export async function getBaseUrl() {
+	const userLink = await getValue("user-link", null);
+	return normalizeBaseUrl(userLink as string | null);
 }
