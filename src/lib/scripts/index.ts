@@ -9,6 +9,7 @@ import { hideMonthOnScroll } from "./hide-month-on-scroll";
 import { reportWidgetBackgroundColor } from "./report-widget-background-color";
 import { showDailyAvailable } from "./show-daily-available";
 import { sidebarRedesign } from "./sidebar-redesign";
+import { templateApplyBreakdown } from "./template-apply-breakdown";
 import { themeSelector } from "./theme";
 import { toggleNotesColumn } from "./toggle-notes-column";
 
@@ -16,5 +17,5 @@ export const scripts = [
 	themeSelector,
 	[backgroundPattern, borderRadius, budgetTableRowHeight],
 	[reportWidgetBackgroundColor, toggleNotesColumn],
-	[colorNegativeBalances, colorTransactions, dimReconciled, hideMonthOnScroll, showDailyAvailable, sidebarRedesign, categoryTemplateInsights],
+	[colorNegativeBalances, colorTransactions, dimReconciled, hideMonthOnScroll, showDailyAvailable, sidebarRedesign, categoryTemplateInsights, templateApplyBreakdown],
 ];
