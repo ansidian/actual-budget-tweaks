@@ -29,7 +29,7 @@
 
 <div class="stack">
 	<span style="font-weight: 500;">{labelText}</span>
-	<select {value} class="select" onchange={handleChange}>
+	<select bind:value class="select" onchange={handleChange}>
 		{#each options as option}
 			<option value={option.value}>{option.label}</option>
 		{/each}
